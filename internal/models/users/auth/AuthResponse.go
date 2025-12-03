@@ -5,6 +5,6 @@ import (
 )
 type AuthResponse struct {
 	Message string `json:"message"`
-	User    *userModel.User  `json:"user"`
+	User   	userModel.PublicUser  `json:"user"`
 	Token   string `json:"token"`
 }

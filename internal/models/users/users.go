@@ -16,3 +16,22 @@ type User struct {
 
    
 }
+
+type PublicUser struct {
+	IDUser    string `json:"id_user"`
+	Nama      string `json:"nama"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	NoTelepon int    `json:"no_telepon"`
+}
+
+// Method untuk convert User menjadi PublicUser (tanpa password)
+func (u *User) ToPublicUser() PublicUser {
+	return PublicUser{
+		IDUser:    u.IDUser,
+		Nama:      u.Nama,
+		Email:     u.Email,
+		Role:      u.Role,
+		NoTelepon: u.NoTelepon,
+	}
+}

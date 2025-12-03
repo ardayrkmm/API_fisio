@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(userID uint, email, name string) (string, error) {
+func GenerateToken(userID string, email, name string) (string, error) {
 	// Token expiration time (24 jam)
 	expirationTime := time.Now().Add(24 * time.Hour)
 
