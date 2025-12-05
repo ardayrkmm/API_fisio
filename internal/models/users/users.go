@@ -2,6 +2,8 @@ package users
 
 import (
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -24,6 +26,10 @@ type PublicUser struct {
 	Role      string `json:"role"`
 	NoTelepon int    `json:"no_telepon"`
 }
+func (u *User) CheckPassword(password string) error {
+    return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+}
+
 
 // Method untuk convert User menjadi PublicUser (tanpa password)
 func (u *User) ToPublicUser() PublicUser {

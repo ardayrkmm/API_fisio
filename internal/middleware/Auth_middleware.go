@@ -135,16 +135,16 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 // GetUserIDFromContext mengambil user ID dari context
-func GetUserIDFromContext(c *gin.Context) (uint, bool) {
+func GetUserIDFromContext(c *gin.Context) (string, bool) {
 	userID, exists := c.Get("userID")
 	if !exists {
-		return 0, false
+		return "", false
 	}
 
 	// Type assertion untuk convert ke uint
-	if id, ok := userID.(uint); ok {
+	if id, ok := userID.(string); ok {
 		return id, true
 	}
 
-	return 0, false
+	return "", false
 }
