@@ -31,3 +31,27 @@ func SetupRoutes(r *gin.Engine) {
 	// Health Check
 	r.GET("/health", authCon.HealthCheck)
 }
+
+
+func SetupMiddlewares(router *gin.Engine) {
+    // Recovery middleware untuk handle panic
+    router.Use(gin.Recovery())
+
+    // Logger middleware untuk log setiap request
+    router.Use(gin.Logger())
+
+    // CORS middleware untuk allow cross-origin requests
+    router.Use(func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+
+        c.Next()
+    })
+}
