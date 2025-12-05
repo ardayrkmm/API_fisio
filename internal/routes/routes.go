@@ -1,6 +1,7 @@
 package routes
 
 import (
+	artikelCon "api_fisioterapi/internal/controller/artikel"
 	authCon "api_fisioterapi/internal/controller/authCon"
 	"api_fisioterapi/internal/middleware"
 
@@ -28,19 +29,33 @@ func SetupRoutes(r *gin.Engine) {
 		protected.POST("/verify-email", authCon.VerifyEmail)
 	}
 
+	artikel := r.Group("/api/artikel")
+	artikel.Use(middleware.AuthMiddleware())
+	{
+    artikel.POST("/", artikelCon.CreateArtikel)
+    artikel.GET("/", artikelCon.GetAllArtikel)
+    artikel.GET("/:id", artikelCon.GetArtikelByID)
+    artikel.PUT("/:id", artikelCon.UpdateArtikel)
+    artikel.DELETE("/:id", artikelCon.DeleteArtikel)
+	}
+	 r.NoRoute(func(c *gin.Context) {
+        c.JSON(404, gin.H{
+            "error": "Not Found",
+            "message": "The requested endpoint does not exist",
+        })
+    })
 	// Health Check
 	r.GET("/health", authCon.HealthCheck)
 }
 
 
 func SetupMiddlewares(router *gin.Engine) {
-    // Recovery middleware untuk handle panic
+
     router.Use(gin.Recovery())
 
-    // Logger middleware untuk log setiap request
     router.Use(gin.Logger())
 
-    // CORS middleware untuk allow cross-origin requests
+    
     router.Use(func(c *gin.Context) {
         c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
