@@ -2,6 +2,9 @@ package routes
 
 import (
 	artikelCon "api_fisioterapi/internal/controller/artikel"
+	latihanUserCon "api_fisioterapi/internal/controller/latihanCon/latihanUser"
+	videoLatihanCon "api_fisioterapi/internal/controller/latihanCon/videoLatihan"
+
 	authCon "api_fisioterapi/internal/controller/authCon"
 	"api_fisioterapi/internal/middleware"
 
@@ -27,6 +30,26 @@ func SetupRoutes(r *gin.Engine) {
 		// Email verification (NON-DB, JWT)
 		protected.POST("/send-verification", authCon.SendVerificationToken)
 		protected.POST("/verify-email", authCon.VerifyEmail)
+	}
+
+	latihanUser := r.Group("/api/latihanuser")
+	latihanUser.Use(middleware.AuthMiddleware())
+	{
+		latihanUser.POST("/", latihanUserCon.CreateLatihan)
+	latihanUser.GET("/usr", latihanUserCon.GetLatihan)
+	latihanUser.GET("/usr/:id", latihanUserCon.GetLatihanUser)
+	latihanUser.PUT("/:id", latihanUserCon.UpdateLatihan)
+	latihanUser.DELETE("/:id", latihanUserCon.DeleteLatihan)
+
+	// LIST VIDEO DALAM LATIHAN USER
+	video := latihanUser.Group("/video")
+	{
+		video.POST("/", videoLatihanCon.CreateListVideo)
+		video.GET("/", videoLatihanCon.GetVideoByLatihan)
+		video.GET("/:id", videoLatihanCon.GetVideoByLatihan)
+		video.PUT("/:id", videoLatihanCon.UpdateVideo)
+		
+	}
 	}
 
 	artikel := r.Group("/api/artikel")

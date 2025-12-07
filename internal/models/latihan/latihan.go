@@ -9,6 +9,6 @@ type Latihan struct {
     UrlGambar   string    `json:"url_gambar" gorm:"column:url_gambar"`
     Deskripsi   string    `json:"deskripsi" gorm:"column:deskripsi;type:text"`
     CreatedAt   time.Time `json:"created_at" gorm:"column:created_at"`
-
+        IDForm      string    `json:"id_form" gorm:"column:id_form"` 
     
 }
