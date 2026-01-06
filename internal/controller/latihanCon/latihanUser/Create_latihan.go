@@ -2,12 +2,15 @@ package latihanuser
 
 import (
 	"api_fisioterapi/internal/config"
+	"api_fisioterapi/internal/controller/helpers"
 	latihanmodel "api_fisioterapi/internal/models/latihan"
+
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
 
 func CreateLatihan(c *gin.Context) {
 	nama := c.PostForm("nama_latihan")
@@ -27,8 +30,9 @@ func CreateLatihan(c *gin.Context) {
 		return
 	}
 
+	idLatihan := helpers.GenerateRandom4Digit()
 	data := latihanmodel.Latihan{
-		IDLatihan:   uuid.NewString(),
+		IDLatihan: idLatihan,
 		NamaLatihan: nama,
 		IDKategori:  idKategori,
 		UrlGambar:   filename,

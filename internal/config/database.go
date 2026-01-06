@@ -54,12 +54,15 @@ func migrate() {
 		&artikelModel.GaleriGambar{},
 		&userModel.Notifikasi{},
 		&userModel.HistoryAktifitas{},
+		&userModel.Question{},
+		&userModel.QuestionOption{},
 		&latihanModel.Latihan{},
 		&latihanModel.ListVideoLatihan{},
 		&userModel.KondisiUser{},
 		&userModel.BagianTubuh{},
 		&latihanModel.JadwalLatihanUser{},
 		&latihanModel.JadwalLatihanDetail{},
+		&latihanModel.Category{},
 	)
 
 	if err != nil {
