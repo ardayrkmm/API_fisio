@@ -5,7 +5,7 @@ import (
 )
 
 type ListVideoLatihan struct {
-    IDListVideo    string    `json:"id_list_video" gorm:"column:id_list_video;primaryKey;size:36"`
+    IDListVideo    string    `json:"id_list_video" gorm:"column:id_list_video;primaryKey;size:4"`
     IDLatihan      string    `gorm:"foreignkey:id_latihan" json:"id_latihan"`
     NamaGerakan    string    `json:"nama_gerakan" gorm:"column:nama_gerakan"`
     VideoURL       string    `json:"video_url" gorm:"column:video_url"`

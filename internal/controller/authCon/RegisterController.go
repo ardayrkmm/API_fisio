@@ -1,6 +1,8 @@
 package authCon
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +12,7 @@ import (
 	ds "api_fisioterapi/internal/config"
 	middlewares "api_fisioterapi/internal/middleware"
 	rs "api_fisioterapi/internal/models/users/auth"
+	dss "api_fisioterapi/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -68,27 +71,38 @@ func Register(c *gin.Context) {
 
 	// Simpan ke database
 	if err := ds.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Registration failed",
-			"message": "Failed to create user account",
-		})
-		return
-	}
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error":   "Registration failed",
+            "message": "Failed to create user account",
+        })
+        return
+    }
 
-	// Generate JWT token untuk auto-login setelah register
-	token, err := middlewares.GenerateToken(user.IDUser, user.Email, user.Nama)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Token generation failed",
-			"message": "Account created but failed to generate authentication token",
-		})
-		return
-	}
+    // --- PERBAIKAN DI SINI ---
+    // 1. Generate 4 angka acak (OTP)
+    rand.Seed(time.Now().UnixNano())
+    otpCode := fmt.Sprintf("%04d", rand.Intn(10000))
 
-	// Success response
-	c.JSON(http.StatusCreated, rs.AuthResponse{
-		Message: "Registration successful",
-		User:    user.ToPublicUser(),
-		Token:   token,
-	})
+    vToken, otpCode, err := GenerateEmailVerificationToken(user.IDUser, user.Email)
+    if err != nil {
+        c.JSON(500, gin.H{"error": "Failed to generate verification token"})
+        return
+    }
+
+    // 2. Kirim ANGKA-nya ke email
+    err = dss.SendVerificationEmail(user.Email, otpCode)
+    if err != nil {
+        fmt.Println("Error sending email:", err)
+    }
+
+    // 3. Generate token login (seperti biasa)
+    loginToken, _ := middlewares.GenerateToken(user.IDUser, user.Email, user.Nama)
+
+    // 4. Kirim Response
+    c.JSON(http.StatusCreated, gin.H{
+        "message": "Registrasi berhasil, cek email untuk kode OTP",
+        "user":    user.ToPublicUser(),
+        "token":   loginToken,      // Ini untuk login
+        "verification_token": vToken, // INI YANG HARUS DIPAKAI DI ENDPOINT VERIFY
+    })
 }

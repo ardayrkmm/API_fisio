@@ -3,7 +3,7 @@ package users
 import "time"
 
 type Notifikasi struct {
-    IDNotifikasi string    `json:"id_notifikasi" gorm:"column:id_notifikasi;primaryKey;size:36"`
+    IDNotifikasi string    `json:"id_notifikasi" gorm:"column:id_notifikasi;primaryKey;size:4"`
     IDUser       string    `gorm:"foreignkey:id_user" json:"id_user"`
     Judul        string    `json:"judul" gorm:"column:judul"`
     Pesan        string    `json:"pesan" gorm:"column:pesan;type:text"`

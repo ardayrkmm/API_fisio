@@ -1,11 +1,12 @@
 package routes
 
 import (
+	ques "api_fisioterapi/internal/controller"
 	artikelCon "api_fisioterapi/internal/controller/artikel"
-	latihanUserCon "api_fisioterapi/internal/controller/latihanCon/latihanUser"
-	videoLatihanCon "api_fisioterapi/internal/controller/latihanCon/videoLatihan"
-
 	authCon "api_fisioterapi/internal/controller/authCon"
+	latihanUserCon "api_fisioterapi/internal/controller/latihanCon/latihanUser"
+
+	videoLatihanCon "api_fisioterapi/internal/controller/latihanCon/videoLatihan"
 	"api_fisioterapi/internal/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -13,33 +14,55 @@ import (
 
 func SetupRoutes(r *gin.Engine) {
 
-	// Public routes
-	auth := r.Group("/auth")
+	//
+	api := r.Group("/api")
+	{
+q := api.Group("/questions")
+	{
+	q.POST("", ques.CreateQuestion)
+	q.GET("", ques.GetQuestions)
+	q.PUT("/:id", ques.UpdateQuestion)
+	q.DELETE("/:id", ques.DeleteQuestion)
+}
+
+//auth
+
+auth := api.Group("/auth")
 	{
 		auth.POST("/register", authCon.Register)
 		auth.POST("/login", authCon.Login)
+		auth.POST("/send-verification", authCon.SendVerificationToken)
+		auth.POST("/verify-email", authCon.VerifyEmail)
+	}
+//api
+	category := api.Group("/categories")
+	{
+		category.POST("/", latihanUserCon.CreateCategory)
+		category.GET("/", latihanUserCon.GetCategories)
+		category.GET("/:id", latihanUserCon.GetCategoryByID)
+		category.PUT("/:id", latihanUserCon.UpdateCategory)
+		category.DELETE("/:id", latihanUserCon.DeleteCategory)
 	}
 
-	// Protected routes (require JWT)
-	protected := r.Group("/auth")
+		protected := api.Group("/auth")
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/profile", authCon.GetProfile)
 		protected.POST("/refresh-token", authCon.RefreshToken)
 
 		// Email verification (NON-DB, JWT)
-		protected.POST("/send-verification", authCon.SendVerificationToken)
-		protected.POST("/verify-email", authCon.VerifyEmail)
+		
 	}
-
-	latihanUser := r.Group("/api/latihanuser")
+	latihanUser := api.Group("/latihanuser")
 	latihanUser.Use(middleware.AuthMiddleware())
 	{
 		latihanUser.POST("/", latihanUserCon.CreateLatihan)
 	latihanUser.GET("/usr", latihanUserCon.GetLatihan)
-	latihanUser.GET("/usr/:id", latihanUserCon.GetLatihanUser)
+
 	latihanUser.PUT("/:id", latihanUserCon.UpdateLatihan)
 	latihanUser.DELETE("/:id", latihanUserCon.DeleteLatihan)
+	latihanUser.POST("/kondisi", latihanUserCon.CreateKondisiUser)
+
 
 	// LIST VIDEO DALAM LATIHAN USER
 	video := latihanUser.Group("/video")
@@ -52,7 +75,7 @@ func SetupRoutes(r *gin.Engine) {
 	}
 	}
 
-	artikel := r.Group("/api/artikel")
+	artikel := api.Group("/artikel")
 	artikel.Use(middleware.AuthMiddleware())
 	{
     artikel.POST("/", artikelCon.CreateArtikel)
@@ -61,6 +84,15 @@ func SetupRoutes(r *gin.Engine) {
     artikel.PUT("/:id", artikelCon.UpdateArtikel)
     artikel.DELETE("/:id", artikelCon.DeleteArtikel)
 	}
+	}
+	
+	
+	
+
+	// Protected routes (require JWT)
+
+
+	
 	 r.NoRoute(func(c *gin.Context) {
         c.JSON(404, gin.H{
             "error": "Not Found",

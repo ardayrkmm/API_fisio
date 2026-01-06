@@ -3,7 +3,7 @@ package users
 import "time"
 
 type KondisiUser struct {
-	IDForm        string    `json:"id_form" gorm:"column:id_form;primaryKey;size:36"`
+	IDForm        string    `json:"id_form" gorm:"column:id_form;primaryKey;size:4"`
 	IDUser        string    `gorm:"foreignkey:id_user" json:"id_user"`
 	IDBagian      string    `gorm:"foreignkey:id_bagian" json:"id_bagian"`
 	LamaNyeriHari int       `json:"lama_nyeri_hari" gorm:"column:lama_nyeri_hari"`

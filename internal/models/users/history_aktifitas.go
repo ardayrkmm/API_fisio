@@ -6,7 +6,7 @@ import (
 
 
 type HistoryAktifitas struct {
-	IDHistoryAktifitas string    `json:"id_history_aktifitas" gorm:"column:id_history_aktifitas;primaryKey;size:36"`
+	IDHistoryAktifitas string    `json:"id_history_aktifitas" gorm:"column:id_history_aktifitas;primaryKey;size:4"`
 	IDLatihan          string    `gorm:"foreignkey:id_latihan" json:"id_latihan"`
 	IDUser             string    `gorm:"foreignkey:id_user" json:"id_user"`
 	Tanggal            time.Time `json:"tanggal" gorm:"column:tanggal"`

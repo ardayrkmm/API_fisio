@@ -2,7 +2,7 @@ package artikel
 
 import "time"
 type Artikel struct {
-    IDArtikel  string    `json:"id_artikel" gorm:"column:id_artikel;primaryKey;size:36"`
+    IDArtikel  string    `json:"id_artikel" gorm:"column:id_artikel;primaryKey;size:4"`
     Judul      string    `json:"judul" gorm:"column:judul"`
     Deskripsi  string    `json:"deskripsi" gorm:"column:deskripsi"`
     IDTags     string    `json:"id_tags" gorm:"column:id_tags"`
