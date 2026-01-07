@@ -62,7 +62,7 @@ func migrate() {
 		&userModel.BagianTubuh{},
 		&latihanModel.JadwalLatihanUser{},
 		&latihanModel.JadwalLatihanDetail{},
-		&latihanModel.Category{},
+		&latihanModel.FaseRehabilitasi{},
 	)
 
 	if err != nil {

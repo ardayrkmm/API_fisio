@@ -25,7 +25,7 @@ func UpdateLatihan(c *gin.Context) {
 		latihan.NamaLatihan = nama
 	}
 	if idKategori != "" {
-		latihan.IDKategori = idKategori
+		latihan.IDFase = idKategori
 	}
 	if deskripsi != "" {
 		latihan.Deskripsi = deskripsi

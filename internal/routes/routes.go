@@ -53,14 +53,19 @@ auth := api.Group("/auth")
 		// Email verification (NON-DB, JWT)
 		
 	}
+		latihanAdmin := api.Group("/latihanAdmin")
+		{
+				latihanAdmin.POST("/", latihanUserCon.CreateLatihan)
+	latihanAdmin.GET("/usr", latihanUserCon.GetLatihan)
+
+	latihanAdmin.PUT("/:id", latihanUserCon.UpdateLatihan)
+	latihanAdmin.DELETE("/:id", latihanUserCon.DeleteLatihan)
+		}
 	latihanUser := api.Group("/latihanuser")
 	latihanUser.Use(middleware.AuthMiddleware())
 	{
-		latihanUser.POST("/", latihanUserCon.CreateLatihan)
-	latihanUser.GET("/usr", latihanUserCon.GetLatihan)
-
-	latihanUser.PUT("/:id", latihanUserCon.UpdateLatihan)
-	latihanUser.DELETE("/:id", latihanUserCon.DeleteLatihan)
+		latihanUser.POST("/jadwal/:id_jadwal/selesai", latihanUserCon.SelesaikanLatihan)
+	
 	latihanUser.POST("/kondisi", latihanUserCon.CreateKondisiUser)
 
 
@@ -73,6 +78,14 @@ auth := api.Group("/auth")
 		video.PUT("/:id", videoLatihanCon.UpdateVideo)
 		
 	}
+	}
+		tubuh := api.Group("/bagian-tubuh")
+	{
+		tubuh.POST("/", ques.CreateBagianTubuh)
+		tubuh.GET("/", ques.GetAllBagianTubuh)
+		tubuh.GET("/:id", ques.GetBagianTubuhByID)
+		tubuh.PUT("/:id", ques.UpdateBagianTubuh)
+	
 	}
 
 	artikel := api.Group("/artikel")

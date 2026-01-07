@@ -6,6 +6,8 @@ import (
 	"api_fisioterapi/internal/models/users"
 	"fmt"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GenerateJadwalOtomatis(kondisi users.KondisiUser) {
@@ -41,8 +43,13 @@ func GenerateJadwalOtomatis(kondisi users.KondisiUser) {
 				IDJadwal:  jadwalID,
 				IDUser:    kondisi.IDUser,
 				Tanggal:   tanggalLatihan,
+					Status:    "locked",
 				CreatedAt: time.Now(),
 			}
+			if minggu == 0 && i == 0 {
+				jadwalBaru.Status = "unlocked"
+			}
+
 			config.DB.Create(&jadwalBaru)
 
 			// B. Masukkan gerakan video ke JadwalLatihanDetail
@@ -57,4 +64,49 @@ func GenerateJadwalOtomatis(kondisi users.KondisiUser) {
 			}
 		}
 	}
+}
+
+
+func SelesaikanLatihan(c *gin.Context) {
+	idJadwal := c.Param("id_jadwal")
+
+	tx := config.DB.Begin()
+
+	var jadwal latihan.JadwalLatihanUser
+	if err := tx.Where("id_jadwal = ?", idJadwal).First(&jadwal).Error; err != nil {
+		tx.Rollback()
+		c.JSON(404, gin.H{"error": "jadwal tidak ditemukan"})
+		return
+	}
+
+	// ❗ VALIDASI STATUS
+	if jadwal.Status != "unlocked" {
+		tx.Rollback()
+		c.JSON(400, gin.H{"error": "latihan belum dapat dikerjakan"})
+		return
+	}
+
+	// 1️⃣ set done
+	if err := tx.Model(&jadwal).Update("status", "done").Error; err != nil {
+		tx.Rollback()
+		c.JSON(500, gin.H{"error": "gagal update status"})
+		return
+	}
+
+	// 2️⃣ unlock next
+	var next latihan.JadwalLatihanUser
+	err := tx.
+		Where("id_user = ? AND tanggal > ? AND status = ?", jadwal.IDUser, jadwal.Tanggal, "locked").
+		Order("tanggal asc").
+		First(&next).Error
+
+	if err == nil {
+		tx.Model(&next).Update("status", "unlocked")
+	}
+
+	tx.Commit()
+
+	c.JSON(200, gin.H{
+		"message": "latihan selesai",
+	})
 }

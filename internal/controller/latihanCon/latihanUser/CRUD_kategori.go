@@ -9,7 +9,7 @@ import (
 )
 
 func CreateCategory(c *gin.Context) {
-	var category models.Category
+	var category models.FaseRehabilitasi
 
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -32,7 +32,7 @@ func CreateCategory(c *gin.Context) {
 }
 
 func GetCategories(c *gin.Context) {
-	var categories []models.Category
+	var categories []models.FaseRehabilitasi
 
 	if err := config.DB.Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -47,7 +47,7 @@ func GetCategories(c *gin.Context) {
 }
 func GetCategoryByID(c *gin.Context) {
 	id := c.Param("id")
-	var category models.Category
+	var category models.FaseRehabilitasi
 
 	if err := config.DB.First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -62,7 +62,7 @@ func GetCategoryByID(c *gin.Context) {
 }
 func UpdateCategory(c *gin.Context) {
 	id := c.Param("id")
-	var category models.Category
+	var category models.FaseRehabilitasi
 
 	if err := config.DB.First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -71,7 +71,7 @@ func UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	var input models.Category
+	var input models.FaseRehabilitasi
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -79,7 +79,7 @@ func UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	category.Nama = input.Nama
+	category.NamaFase = input.NamaFase
 
 	config.DB.Save(&category)
 
@@ -91,7 +91,7 @@ func UpdateCategory(c *gin.Context) {
 
 func DeleteCategory(c *gin.Context) {
 	id := c.Param("id")
-	var category models.Category
+	var category models.FaseRehabilitasi
 
 	if err := config.DB.First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
