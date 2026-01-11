@@ -15,6 +15,17 @@ import (
 func SetupRoutes(r *gin.Engine) {
 
 	//
+	r.Use(func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+        c.Next()
+    })
 	api := r.Group("/api")
 	{
 q := api.Group("/questions")
@@ -64,9 +75,11 @@ auth := api.Group("/auth")
 	latihanUser := api.Group("/latihanuser")
 	latihanUser.Use(middleware.AuthMiddleware())
 	{
+		latihanUser.POST("/generate-jadwal", latihanUserCon.GenerateJadwalOtomatis)
 		latihanUser.POST("/jadwal/:id_jadwal/selesai", latihanUserCon.SelesaikanLatihan)
-	
-	latihanUser.POST("/kondisi", latihanUserCon.CreateKondisiUser)
+		latihanUser.GET("/jadwal", latihanUserCon.GetJadwalUser)
+
+		latihanUser.POST("/kondisi", latihanUserCon.CreateKondisiUser)
 
 
 	// LIST VIDEO DALAM LATIHAN USER

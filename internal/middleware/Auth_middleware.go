@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,7 +26,7 @@ func GenerateToken(userID string, email, name string) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "go-gin-auth-api",
-			Subject:   fmt.Sprintf("%d", userID),
+			Subject:   userID,
 		},
 	}
 
@@ -49,87 +50,82 @@ func GenerateToken(userID string, email, name string) (string, error) {
 // AuthMiddleware memverifikasi JWT token dari request header
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Ambil token dari header Authorization
-		authHeader := c.GetHeader("Authorization")
 
-		// Validasi format header
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":   "Authorization header is required",
-				"message": "Please provide a valid JWT token in the Authorization header",
+				"error": "Authorization header required",
 			})
 			c.Abort()
 			return
 		}
 
-		// Header format harus: Bearer <token>
-		tokenParts := strings.Split(authHeader, " ")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+		// Format: Bearer <token>
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":   "Invalid authorization format",
-				"message": "Authorization header must be in format: Bearer <token>",
+				"error": "Invalid Authorization format",
 			})
 			c.Abort()
 			return
 		}
 
-		tokenString := tokenParts[1]
+		tokenString := parts[1]
+		jwtSecret := os.Getenv("JWT_SECRET")
+		if jwtSecret == "" {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "JWT secret not configured",
+			})
+			c.Abort()
+			return
+		}
 
-		// Parse dan validasi token
 		claims := &Claims{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			// Validasi signing method
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
 
-			jwtSecret := os.Getenv("JWT_SECRET")
-			if jwtSecret == "" {
-				return nil, fmt.Errorf("JWT_SECRET is not configured")
-			}
+		token, err := jwt.ParseWithClaims(
+			tokenString,
+			claims,
+			func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, fmt.Errorf("unexpected signing method")
+				}
+				return []byte(jwtSecret), nil
+			},
+		)
 
-			return []byte(jwtSecret), nil
-		})
-
-		// Handle berbagai error cases
+		// ✅ FIX JWT v5 ERROR HANDLING
 		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
+			if errors.Is(err, jwt.ErrTokenExpired) {
 				c.JSON(http.StatusUnauthorized, gin.H{
-					"error":   "Invalid token signature",
-					"message": "The token signature is invalid",
+					"error": "Token expired",
 				})
-			} else if err == jwt.ErrTokenExpired {
+			} else if errors.Is(err, jwt.ErrSignatureInvalid) {
 				c.JSON(http.StatusUnauthorized, gin.H{
-					"error":   "Token expired",
-					"message": "Your session has expired. Please login again",
+					"error": "Invalid token signature",
 				})
 			} else {
 				c.JSON(http.StatusUnauthorized, gin.H{
-					"error":   "Invalid token",
-					"message": "The provided token is invalid",
+					"error": err.Error(),
 				})
 			}
 			c.Abort()
 			return
 		}
 
-		// Validasi token
 		if !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":   "Invalid token",
-				"message": "The token is not valid",
+				"error": "Invalid token",
 			})
 			c.Abort()
 			return
 		}
 
-		// Simpan user info ke context untuk digunakan di handler
+		// ✅ SET CONTEXT (WAJIB)
 		c.Set("userID", claims.UserID)
 		c.Set("userEmail", claims.Email)
-		c.Set("userNama", claims.Name)
+		c.Set("userName", claims.Name)
 		c.Set("claims", claims)
 
-		// Lanjutkan ke handler berikutnya
 		c.Next()
 	}
 }

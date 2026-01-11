@@ -7,6 +7,7 @@ type Question struct {
 	Title       string           `json:"title"`
 	Subtitle    string           `json:"subtitle"`
 	MultiSelect bool             `json:"multiSelect"`
+	TargetField string `json:"target_field"`
 	Options     []QuestionOption `gorm:"foreignKey:QuestionID" json:"options"`
 	CreatedAt   time.Time        `json:"created_at"`
 }
